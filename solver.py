@@ -17,43 +17,71 @@ def clasificar_ecuacion(ecuacion, y_func):
             return mapa_hints[hint]
     return clasificacion[0] if clasificacion else None
 
+def get_procedimiento_conceptual(tipo_resuelto):
+    procedimiento = f"Tipo de Ecuación Detectado/Seleccionado: {tipo_resuelto}\n\n"
+
+    if tipo_resuelto == "separable":
+        procedimiento += "Procedimiento Conceptual:\n"
+        procedimiento += "1. Separar las variables x e y en lados opuestos de la ecuación.\n"
+        procedimiento += "2. Integrar ambos lados de la ecuación con respecto a sus respectivas variables.\n"
+        procedimiento += "3. Despejar y(x) para obtener la solución general.\n"
+    elif tipo_resuelto == "1st_linear":
+        procedimiento += "Procedimiento Conceptual:\n"
+        procedimiento += "1. Asegurarse de que la ecuación esté en la forma estándar: y' + P(x)y = Q(x).\n"
+        procedimiento += "2. Calcular el factor integrante: e^(∫P(x)dx).\n"
+        procedimiento += "3. Multiplicar toda la ecuación por el factor integrante.\n"
+        procedimiento += "4. Integrar ambos lados para encontrar la solución general.\n"
+    elif tipo_resuelto == "1st_homogeneous_coeff_best":
+        procedimiento += "Procedimiento Conceptual:\n"
+        procedimiento += "1. Realizar la sustitución y = v*x, donde v es una función de x.\n"
+        procedimiento += "2. Transformar la ecuación homogénea en una ecuación de variables separables en términos de v y x.\n"
+        procedimiento += "3. Resolver la ecuación de variables separables para v.\n"
+        procedimiento += "4. Sustituir v = y/x de nuevo para obtener la solución en términos de y y x.\n"
+    elif tipo_resuelto == "1st_exact":
+        procedimiento += "Procedimiento Conceptual:\n"
+        procedimiento += "1. Asegurarse de que la ecuación esté en la forma M(x,y)dx + N(x,y)dy = 0.\n"
+        procedimiento += "2. Verificar la condición de exactitud: ∂M/∂y = ∂N/∂x.\n"
+        procedimiento += "3. Encontrar una función potencial F(x,y) tal que ∂F/∂x = M y ∂F/∂y = N.\n"
+        procedimiento += "4. La solución general es F(x,y) = C.\n"
+    else:
+        procedimiento += "Procedimiento Conceptual: No se dispone de un procedimiento detallado para este tipo específico o la clasificación.\n"
+
+    return procedimiento
+
 def resolver_ecuacion(ecuacion_str, tipo):
     try:
         x = symbols('x')
         y_func = Function('y')(x)
 
-        # Creamos un diccionario para que el parser sepa qué es 'y' y qué es 'x'
         local_dict = {
             'y': y_func,
             'x': x
         }
 
-        # Reemplazamos y' con la derivada real de y(x) DESPUÉS de parsear
-        # Esto evita los errores de doble sustitución y de "no es llamable"
         if '=' not in ecuacion_str:
-            return "Error: La ecuación debe contener un signo '='."
+            return None, "Error: La ecuación debe contener un signo '='."
 
         partes = ecuacion_str.split('=', 1)
         lhs_str = partes[0].strip()
         rhs_str = partes[1].strip()
 
-        # Parseamos el lado derecho
         rhs_expr = parse_expr(rhs_str, local_dict=local_dict)
 
-        # Asumimos que el lado izquierdo es y'
         if lhs_str == "y'":
             lhs_expr = Derivative(y_func, x)
         else:
-            # Si no es y', también lo parseamos (para ecuaciones tipo f(x,y) = g(x,y))
             lhs_expr = parse_expr(lhs_str, local_dict=local_dict)
 
         ecuacion = Eq(lhs_expr, rhs_expr)
 
         hint = ''
+        tipo_resuelto = tipo # Guardamos el tipo seleccionado o autodetectado
+
         if tipo == "Autodetectar":
             hint = clasificar_ecuacion(ecuacion, y_func)
             if not hint:
-                return "No se pudo clasificar la ecuación automáticamente. Intente especificar el tipo."
+                return None, "No se pudo clasificar la ecuación automáticamente. Intente especificar el tipo."
+            tipo_resuelto = hint # Actualizamos el tipo resuelto al hint de sympy
         elif tipo == "Lineal":
             hint = '1st_linear'
         elif tipo == "Variables Separables":
@@ -64,7 +92,9 @@ def resolver_ecuacion(ecuacion_str, tipo):
             hint = '1st_exact'
 
         solucion = dsolve(ecuacion, y_func, hint=hint)
-        return solucion
+        procedimiento_texto = get_procedimiento_conceptual(tipo_resuelto)
+
+        return solucion, procedimiento_texto
 
     except Exception as e:
-        return f"Error al procesar la ecuación: {e}"
+        return None, f"Error al procesar la ecuación: {e}"

@@ -9,10 +9,10 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Solucionador de Ecuaciones Diferenciales")
-        self.geometry("700x500")
+        self.geometry("700x700") # Aumentamos el tamaño para el procedimiento
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure(8, weight=1) # Ajustamos la fila para la solución
 
         self.label_ecuacion = ctk.CTkLabel(self, text="Ecuación diferencial (ej: y' = 2*x / y ):")
         self.label_ecuacion.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
@@ -29,12 +29,19 @@ class App(ctk.CTk):
         self.boton_resolver = ctk.CTkButton(self, text="Resolver", command=self.resolver)
         self.boton_resolver.grid(row=4, column=0, padx=10, pady=10)
 
+        # Nuevo: Área para el procedimiento
+        self.label_procedimiento = ctk.CTkLabel(self, text="Procedimiento:")
+        self.label_procedimiento.grid(row=5, column=0, padx=10, pady=(10, 0), sticky="ew")
+
+        self.texto_procedimiento = ctk.CTkTextbox(self, height=150) # Altura para el procedimiento
+        self.texto_procedimiento.grid(row=6, column=0, padx=10, pady=5, sticky="nsew")
+
         self.label_solucion = ctk.CTkLabel(self, text="Solución:")
-        self.label_solucion.grid(row=5, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.label_solucion.grid(row=7, column=0, padx=10, pady=(10, 0), sticky="ew")
 
         # Frame para contener la solución (texto o imagen)
         self.solucion_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.solucion_frame.grid(row=6, column=0, padx=10, pady=5, sticky="nsew")
+        self.solucion_frame.grid(row=8, column=0, padx=10, pady=5, sticky="nsew")
         self.solucion_frame.grid_rowconfigure(0, weight=1)
         self.solucion_frame.grid_columnconfigure(0, weight=1)
 
@@ -69,11 +76,15 @@ class App(ctk.CTk):
             self.mostrar_texto("Por favor, introduce una ecuación.")
             return
 
-        solucion = resolver_ecuacion(ecuacion, tipo)
+        solucion_obj, procedimiento_texto = resolver_ecuacion(ecuacion, tipo)
 
-        # Si la solución es un string, es un error o un mensaje.
-        if isinstance(solucion, str):
-            self.mostrar_texto(solucion)
+        # Mostrar el procedimiento
+        self.texto_procedimiento.delete("1.0", "end")
+        self.texto_procedimiento.insert("1.0", procedimiento_texto)
+
+        # Si la solución es None, es un error o un mensaje.
+        if solucion_obj is None:
+            self.mostrar_texto(procedimiento_texto) # El procedimiento_texto ya contiene el error
             return
 
         # Si es una solución de SymPy, intentamos renderizarla con LaTeX.
@@ -81,12 +92,12 @@ class App(ctk.CTk):
             # Usamos un nombre de archivo temporal para la imagen
             nombre_archivo = "solucion.png"
             # viewer='file' y output='png' son claves para que guarde el archivo
-            preview(solucion, viewer='file', filename=nombre_archivo, dvioptions=["-D", "170"])
+            preview(solucion_obj, viewer='file', filename=nombre_archivo, dvioptions=["-D", "170"])
             
             # Si preview() funcionó, el archivo existe. Lo mostramos.
             self.mostrar_imagen(nombre_archivo)
 
         except Exception as e:
             # Si preview() falla (ej. no hay LaTeX), mostramos la versión en texto.
-            fallback_texto = f"No se pudo renderizar con LaTeX.\n\nError específico: {e}\n\nSolución (texto plano):\n{str(solucion)}"
+            fallback_texto = f"No se pudo renderizar con LaTeX.\n\nError específico: {e}\n\nSolución (texto plano):\n{str(solucion_obj)}"
             self.mostrar_texto(fallback_texto)
