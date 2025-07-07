@@ -30,8 +30,8 @@ Para ejecutar este proyecto, es necesario tener Python y ciertas librerías inst
 
 2.  **Clonar el Repositorio**: Abre una terminal (Command Prompt o PowerShell) y ejecuta:
     ```bash
-    git clone https://github.com/Abraham-Lozano/solucionador_ecuaciones_diferenciales.git
-    cd solucionador_ecuaciones_diferenciales
+    git clone git@github.com:Abraham-Orta/Solucionador_Ecuaciones_Diferenciales.git
+    cd Solucionador_Ecuaciones_Diferenciales
     ```
 
 3.  **Crear un Entorno Virtual (Recomendado)**:
