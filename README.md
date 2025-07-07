@@ -2,7 +2,6 @@
 
 Este proyecto es una aplicación de escritorio desarrollada en Python que permite a los usuarios resolver diferentes tipos de ecuaciones diferenciales ordinarias de primer orden. La aplicación cuenta con una interfaz gráfica intuitiva construida con `customtkinter`.
 
-![solucion](https://github.com/Abraham-Lozano/solucionador_ecuaciones_diferenciales/assets/103132383/92394539-1cf3-4bb1-b8a1-918a102cf88d)
 
 ## Características
 
