@@ -64,7 +64,7 @@ def resolver_ecuacion(ecuacion_str, tipo):
             hint = '1st_exact'
 
         solucion = dsolve(ecuacion, y_func, hint=hint)
-        return str(solucion)
+        return solucion
 
     except Exception as e:
         return f"Error al procesar la ecuación: {e}"
