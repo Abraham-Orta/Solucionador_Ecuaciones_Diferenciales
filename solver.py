@@ -83,7 +83,7 @@ def resolver_ecuacion(ecuacion_str, tipo):
                 return None, "No se pudo clasificar la ecuación automáticamente. Intente especificar el tipo."
             tipo_resuelto = hint # Actualizamos el tipo resuelto al hint de sympy
         elif tipo == "Lineal":
-            hint = '1st_linear'
+            hint = '1st_Clinear'
         elif tipo == "Variables Separables":
             hint = 'separable'
         elif tipo == "Homogénea":
