@@ -12,8 +12,17 @@ Este proyecto es una aplicación de escritorio desarrollada en Python que permit
     -   Exactas
 -   **Detección Automática**: Puede detectar automáticamente el tipo de ecuación diferencial introducida.
 -   **Interfaz Gráfica de Usuario**: Interfaz amigable y fácil de usar para introducir las ecuaciones y ver las soluciones.
--   **Visualización de Soluciones**: Muestra la solución de la ecuación de forma clara, utilizando LaTeX para una mejor presentación si está disponible en el sistema.
--   **Procedimiento Conceptual**: Ofrece una breve explicación del método utilizado para resolver la ecuación, ayudando al usuario a comprender el proceso.
+*   **Resolución de Ecuaciones Diferenciales**: Resuelve ecuaciones diferenciales de primer orden.
+*   **Detección Automática de Tipo**: Puede autodetectar el tipo de ecuación diferencial (variables separables, lineal, homogénea, exacta).
+*   **Procedimiento Conceptual**: Muestra un procedimiento conceptual paso a paso para el tipo de ecuación detectado o seleccionado.
+*   **Normalización de Entrada**:
+    *   **Derivadas**: Acepta diferentes formatos para las derivadas (ej: `dy/dx`, `y'(x)`) y los normaliza a `y'`.
+    *   **Multiplicación Implícita**: Interpreta la multiplicación implícita (ej: `2x` se entiende como `2*x`).
+    *   **Exponenciación**: Reconoce el símbolo `^` como operador de exponenciación (ej: `x^2` se entiende como `x**2`).
+*   **Interfaz Gráfica Mejorada**:
+    *   **Botones de Símbolos**: Incluye botones para insertar rápidamente símbolos matemáticos comunes (`+`, `-`, `*`, `/`, `^`, `(`, `)`, `y'`, `x`, `dy/dx`, `e`, `sqrt()`, `sin()`, `cos()`, `tan()`, `log()`, `pi`, `=`).
+    *   **Botones Uniformes y Centrados**: Todos los botones de símbolos tienen el mismo tamaño y están centrados en la interfaz, manteniendo su posición al redimensionar la ventana.
+*   **Visualización de Soluciones**: Muestra la solución de la ecuación diferencial, intentando renderizarla en formato LaTeX si es posible, o como texto plano en caso contrario.
 
 ## Requisitos
 
