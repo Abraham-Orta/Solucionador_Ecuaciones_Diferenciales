@@ -1,5 +1,6 @@
 from sympy import dsolve, Eq, symbols, Function, Derivative, classify_ode
-from sympy.parsing.sympy_parser import parse_expr
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+import re
 
 def clasificar_ecuacion(ecuacion, y_func):
     """Clasifica la ecuación diferencial y devuelve el mejor hint."""
@@ -48,8 +49,26 @@ def get_procedimiento_conceptual(tipo_resuelto):
 
     return procedimiento
 
+import re
+
+def normalizar_ecuacion(ecuacion_str):
+    """
+    Normaliza la ecuación diferencial para que sea compatible con el solver.
+    Convierte formatos como dy/dx, y'(x), y' a una representación estándar (y').
+    Maneja espacios en blanco alrededor de los términos.
+    """
+    # Patrón para y'(x) o y' con espacios opcionales
+    ecuacion_str = re.sub(r"y\s*'\s*\(?\s*x\s*\)?", "y'", ecuacion_str)
+    # Patrón para dy/dx con espacios opcionales
+    ecuacion_str = re.sub(r"d\s*y\s*/\s*d\s*x", "y'", ecuacion_str)
+    return ecuacion_str
+
+
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+
 def resolver_ecuacion(ecuacion_str, tipo):
     try:
+        ecuacion_str = normalizar_ecuacion(ecuacion_str)
         x = symbols('x')
         y_func = Function('y')(x)
 
@@ -58,6 +77,8 @@ def resolver_ecuacion(ecuacion_str, tipo):
             'x': x
         }
 
+        transformations = standard_transformations + (implicit_multiplication_application,)
+
         if '=' not in ecuacion_str:
             return None, "Error: La ecuación debe contener un signo '='."
 
@@ -65,12 +86,12 @@ def resolver_ecuacion(ecuacion_str, tipo):
         lhs_str = partes[0].strip()
         rhs_str = partes[1].strip()
 
-        rhs_expr = parse_expr(rhs_str, local_dict=local_dict)
+        rhs_expr = parse_expr(rhs_str, local_dict=local_dict, transformations=transformations)
 
         if lhs_str == "y'":
             lhs_expr = Derivative(y_func, x)
         else:
-            lhs_expr = parse_expr(lhs_str, local_dict=local_dict)
+            lhs_expr = parse_expr(lhs_str, local_dict=local_dict, transformations=transformations)
 
         ecuacion = Eq(lhs_expr, rhs_expr)
 
