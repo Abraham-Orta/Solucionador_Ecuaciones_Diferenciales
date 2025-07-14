@@ -9,10 +9,10 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Solucionador de Ecuaciones Diferenciales")
-        self.geometry("700x700") # Aumentamos el tamaño para el procedimiento
+        self.geometry("700x800") # Aumentamos el tamaño para los botones y procedimiento
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(8, weight=1) # Ajustamos la fila para la solución
+        self.grid_rowconfigure(10, weight=1) # Ajustamos la fila para la solución
 
         self.label_ecuacion = ctk.CTkLabel(self, text="Ecuación diferencial (ej: y' = 2*x / y ):")
         self.label_ecuacion.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
@@ -20,28 +20,43 @@ class App(ctk.CTk):
         self.entry_ecuacion = ctk.CTkEntry(self, placeholder_text="y' = (x**2 + 2) / (3*y**2)")
         self.entry_ecuacion.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
 
+        # Frame para los botones de símbolos
+        self.simbolos_frame = ctk.CTkFrame(self)
+        self.simbolos_frame.grid(row=2, column=0, padx=10, pady=5)
+        self.simbolos_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=1)
+
+        simbolos_fila1 = ['+', '-', '*', '/', '^', '(', ')', "y'", 'x', 'dy/dx']
+        for i, simbolo in enumerate(simbolos_fila1):
+            boton = ctk.CTkButton(self.simbolos_frame, text=simbolo, width=60, command=lambda s=simbolo: self.insertar_simbolo(s))
+            boton.grid(row=0, column=i, padx=5, pady=5)
+
+        simbolos_fila2 = ['e', 'sqrt()', 'sin()', 'cos()', 'tan()', 'log()', 'pi', '=']
+        for i, simbolo in enumerate(simbolos_fila2):
+            boton = ctk.CTkButton(self.simbolos_frame, text=simbolo, width=60, command=lambda s=simbolo: self.insertar_simbolo(s))
+            boton.grid(row=1, column=i, padx=5, pady=5)
+
         self.label_tipo = ctk.CTkLabel(self, text="Tipo de ecuación:")
-        self.label_tipo.grid(row=2, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.label_tipo.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="ew")
 
         self.tipo_ecuacion = ctk.CTkOptionMenu(self, values=["Autodetectar", "Variables Separables", "Lineal", "Homogénea", "Exacta"])
-        self.tipo_ecuacion.grid(row=3, column=0, padx=10, pady=5)
+        self.tipo_ecuacion.grid(row=4, column=0, padx=10, pady=5)
 
         self.boton_resolver = ctk.CTkButton(self, text="Resolver", command=self.resolver)
-        self.boton_resolver.grid(row=4, column=0, padx=10, pady=10)
+        self.boton_resolver.grid(row=5, column=0, padx=10, pady=10)
 
         # Nuevo: Área para el procedimiento
         self.label_procedimiento = ctk.CTkLabel(self, text="Procedimiento:")
-        self.label_procedimiento.grid(row=5, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.label_procedimiento.grid(row=6, column=0, padx=10, pady=(10, 0), sticky="ew")
 
         self.texto_procedimiento = ctk.CTkTextbox(self, height=150) # Altura para el procedimiento
-        self.texto_procedimiento.grid(row=6, column=0, padx=10, pady=5, sticky="nsew")
+        self.texto_procedimiento.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
 
         self.label_solucion = ctk.CTkLabel(self, text="Solución:")
-        self.label_solucion.grid(row=7, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.label_solucion.grid(row=8, column=0, padx=10, pady=(10, 0), sticky="ew")
 
         # Frame para contener la solución (texto o imagen)
         self.solucion_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.solucion_frame.grid(row=8, column=0, padx=10, pady=5, sticky="nsew")
+        self.solucion_frame.grid(row=9, column=0, padx=10, pady=5, sticky="nsew")
         self.solucion_frame.grid_rowconfigure(0, weight=1)
         self.solucion_frame.grid_columnconfigure(0, weight=1)
 
@@ -52,6 +67,9 @@ class App(ctk.CTk):
         # Widget de imagen (para la solución LaTeX)
         self.imagen_solucion_label = ctk.CTkLabel(self.solucion_frame, text="")
         self.solucion_img = None # Para mantener una referencia a la imagen
+
+    def insertar_simbolo(self, simbolo):
+        self.entry_ecuacion.insert(ctk.INSERT, simbolo)
 
     def mostrar_texto(self, texto):
         self.imagen_solucion_label.grid_forget() # Ocultar imagen
@@ -101,3 +119,4 @@ class App(ctk.CTk):
             # Si preview() falla (ej. no hay LaTeX), mostramos la versión en texto.
             fallback_texto = f"No se pudo renderizar con LaTeX.\n\nError específico: {e}\n\nSolución (texto plano):\n{str(solucion_obj)}"
             self.mostrar_texto(fallback_texto)
+

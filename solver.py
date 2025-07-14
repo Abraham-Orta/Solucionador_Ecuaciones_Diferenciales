@@ -1,5 +1,5 @@
 from sympy import dsolve, Eq, symbols, Function, Derivative, classify_ode
-from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 import re
 
 def clasificar_ecuacion(ecuacion, y_func):
@@ -64,7 +64,7 @@ def normalizar_ecuacion(ecuacion_str):
     return ecuacion_str
 
 
-from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 
 def resolver_ecuacion(ecuacion_str, tipo):
     try:
@@ -77,7 +77,7 @@ def resolver_ecuacion(ecuacion_str, tipo):
             'x': x
         }
 
-        transformations = standard_transformations + (implicit_multiplication_application,)
+        transformations = standard_transformations + (implicit_multiplication_application, convert_xor)
 
         if '=' not in ecuacion_str:
             return None, "Error: La ecuación debe contener un signo '='."
