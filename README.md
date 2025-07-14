@@ -2,17 +2,13 @@
 
 Este proyecto es una aplicación de escritorio desarrollada en Python que permite a los usuarios resolver diferentes tipos de ecuaciones diferenciales ordinarias de primer orden. La aplicación cuenta con una interfaz gráfica intuitiva construida con `customtkinter`.
 
-
 ## Características
 
--   **Resolución de Ecuaciones Diferenciales**: Soporta la resolución de ecuaciones:
-    -   De variables separables
-    -   Lineales
-    -   Homogéneas
-    -   Exactas
--   **Detección Automática**: Puede detectar automáticamente el tipo de ecuación diferencial introducida.
--   **Interfaz Gráfica de Usuario**: Interfaz amigable y fácil de usar para introducir las ecuaciones y ver las soluciones.
-*   **Resolución de Ecuaciones Diferenciales**: Resuelve ecuaciones diferenciales de primer orden.
+*   **Resolución de Ecuaciones Diferenciales**: Resuelve ecuaciones diferenciales de primer orden, incluyendo:
+    *   Variables Separables
+    *   Lineales
+    *   Homogéneas
+    *   Exactas
 *   **Detección Automática de Tipo**: Puede autodetectar el tipo de ecuación diferencial (variables separables, lineal, homogénea, exacta).
 *   **Procedimiento Conceptual**: Muestra un procedimiento conceptual paso a paso para el tipo de ecuación detectado o seleccionado.
 *   **Normalización de Entrada**:
@@ -115,8 +111,12 @@ El proyecto está estructurado en varios ficheros Python, cada uno con una respo
     -   Llamar al `solver.py` para procesar la ecuación.
     -   Mostrar el procedimiento y la solución en la interfaz. Si LaTeX está instalado, intenta renderizar la solución como una imagen para una mejor legibilidad. En caso contrario, muestra la solución como texto plano.
 -   `solver.py`: Es el cerebro de la aplicación. Aquí reside la lógica para resolver las ecuaciones diferenciales:
+    -   **`normalizar_ecuacion(ecuacion_str)`**: Esta nueva función se encarga de pre-procesar la cadena de la ecuación diferencial introducida por el usuario. Su objetivo es estandarizar la notación de las derivadas y operadores para que SymPy pueda interpretarlos correctamente. Específicamente:
+        -   Convierte `dy/dx` y `y'(x)` (con o sin espacios) a la notación `y'`.
+        -   Habilita la multiplicación implícita, de modo que `2x` se interpreta como `2*x`.
+        -   Interpreta el símbolo `^` como el operador de exponenciación (`**`), permitiendo expresiones como `x^2`.
     -   Utiliza la librería `sympy` para el manejo simbólico de las matemáticas.
-    -   **Parsing de la Ecuación**: Convierte la cadena de texto introducida por el usuario en una expresión simbólica que `sympy` pueda entender.
+    -   **Parsing de la Ecuación**: Convierte la cadena de texto introducida por el usuario en una expresión simbólica que `sympy` pueda entender, aplicando las transformaciones necesarias (incluyendo las de `normalizar_ecuacion`).
     -   **Clasificación**: Emplea la función `classify_ode` de `sympy` para determinar el tipo de la ecuación diferencial si el usuario elige la opción "Autodetectar".
     -   **Resolución**: Utiliza `dsolve` de `sympy` para encontrar la solución a la ecuación. Se le pasa un "hint" (pista) basado en la selección del usuario o en la clasificación automática para guiar al solver.
     -   **Generación de Procedimiento**: Proporciona una explicación conceptual de alto nivel sobre el método de resolución que se está utilizando.
@@ -130,7 +130,8 @@ El proyecto está estructurado en varios ficheros Python, cada uno con una respo
 4.  El método `resolver` en `gui.py` se activa. Recoge la ecuación y el tipo.
 5.  Se llama a la función `resolver_ecuacion` de `solver.py`.
 6.  En `solver.py`:
-    -   La ecuación se parsea a un objeto `Eq` de `sympy`.
+    -   **Primero, la función `normalizar_ecuacion` pre-procesa la entrada del usuario.**
+    -   La ecuación normalizada se parsea a un objeto `Eq` de `sympy`.
     -   Se determina el `hint` para `dsolve`.
     -   `dsolve` resuelve la ecuación.
     -   Se genera el texto del procedimiento conceptual.
@@ -139,4 +140,3 @@ El proyecto está estructurado en varios ficheros Python, cada uno con una respo
     -   El texto del procedimiento se muestra en su área correspondiente.
     -   Se intenta renderizar la solución con `sympy.preview`, que usa LaTeX para crear una imagen PNG (`solucion.png`).
     -   Si tiene éxito, la imagen se muestra en la GUI. Si falla (p. ej., no hay LaTeX), la solución se convierte a texto plano y se muestra en su lugar.
-
