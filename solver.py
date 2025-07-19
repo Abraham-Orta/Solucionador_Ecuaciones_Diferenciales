@@ -4,7 +4,6 @@ import re
 
 def clasificar_ecuacion(ecuacion, y_func):
     """Clasifica la ecuación diferencial y devuelve el mejor hint."""
-    # dsolve hints a veces son diferentes a los de classify_ode, mapeamos los que necesitamos
     mapa_hints = {
         'separable': 'separable',
         '1st_linear': '1st_linear',
@@ -12,7 +11,6 @@ def clasificar_ecuacion(ecuacion, y_func):
         'exact': '1st_exact'
     }
     clasificacion = classify_ode(ecuacion, y_func)
-    # Devuelve el primer hint compatible que encontremos
     for hint in clasificacion:
         if hint in mapa_hints:
             return mapa_hints[hint]
@@ -20,91 +18,65 @@ def clasificar_ecuacion(ecuacion, y_func):
 
 def get_procedimiento_conceptual(tipo_resuelto):
     procedimiento = f"Tipo de Ecuación Detectado/Seleccionado: {tipo_resuelto}\n\n"
-
     if tipo_resuelto == "separable":
-        procedimiento += "Procedimiento Conceptual:\n"
-        procedimiento += "1. Separar las variables x e y en lados opuestos de la ecuación.\n"
-        procedimiento += "2. Integrar ambos lados de la ecuación con respecto a sus respectivas variables.\n"
-        procedimiento += "3. Despejar y(x) para obtener la solución general.\n"
+        procedimiento += "Procedimiento Conceptual:\n1. Separar las variables x e y.\n2. Integrar ambos lados.\n3. Despejar y(x)."
     elif tipo_resuelto == "1st_linear":
-        procedimiento += "Procedimiento Conceptual:\n"
-        procedimiento += "1. Asegurarse de que la ecuación esté en la forma estándar: y' + P(x)y = Q(x).\n"
-        procedimiento += "2. Calcular el factor integrante: e^(∫P(x)dx).\n"
-        procedimiento += "3. Multiplicar toda la ecuación por el factor integrante.\n"
-        procedimiento += "4. Integrar ambos lados para encontrar la solución general.\n"
+        procedimiento += "Procedimiento Conceptual:\n1. Forma estándar: y' + P(x)y = Q(x).\n2. Factor integrante: e^(∫P(x)dx).\n3. Multiplicar por factor integrante.\n4. Integrar para solución general."
     elif tipo_resuelto == "1st_homogeneous_coeff_best":
-        procedimiento += "Procedimiento Conceptual:\n"
-        procedimiento += "1. Realizar la sustitución y = v*x, donde v es una función de x.\n"
-        procedimiento += "2. Transformar la ecuación homogénea en una ecuación de variables separables en términos de v y x.\n"
-        procedimiento += "3. Resolver la ecuación de variables separables para v.\n"
-        procedimiento += "4. Sustituir v = y/x de nuevo para obtener la solución en términos de y y x.\n"
+        procedimiento += "Procedimiento Conceptual:\n1. Sustitución y = v*x.\n2. Transformar a ecuación de variables separables.\n3. Resolver para v.\n4. Sustituir v = y/x."
     elif tipo_resuelto == "1st_exact":
-        procedimiento += "Procedimiento Conceptual:\n"
-        procedimiento += "1. Asegurarse de que la ecuación esté en la forma M(x,y)dx + N(x,y)dy = 0.\n"
-        procedimiento += "2. Verificar la condición de exactitud: ∂M/∂y = ∂N/∂x.\n"
-        procedimiento += "3. Encontrar una función potencial F(x,y) tal que ∂F/∂x = M y ∂F/∂y = N.\n"
-        procedimiento += "4. La solución general es F(x,y) = C.\n"
+        procedimiento += "Procedimiento Conceptual:\n1. Forma M(x,y)dx + N(x,y)dy = 0.\n2. Verificar ∂M/∂y = ∂N/∂x.\n3. Encontrar función potencial F(x,y).\n4. Solución general F(x,y) = C."
     else:
-        procedimiento += "Procedimiento Conceptual: No se dispone de un procedimiento detallado para este tipo específico o la clasificación.\n"
-
+        procedimiento += "Procedimiento no disponible."
     return procedimiento
-
-import re
 
 def normalizar_ecuacion(ecuacion_str):
     """
-    Normaliza la ecuación diferencial para que sea compatible con el solver.
-    Convierte formatos como dy/dx, y'(x), y' a una representación estándar (y').
-    Maneja espacios en blanco alrededor de los términos.
+    Normaliza la ecuación a y_prime para el solver.
     """
-    # Patrón para y'(x) o y' con espacios opcionales
-    ecuacion_str = re.sub(r"y\s*'\s*\(?\s*x\s*\)?", "y'", ecuacion_str)
-    # Patrón para dy/dx con espacios opcionales
-    ecuacion_str = re.sub(r"d\s*y\s*/\s*d\s*x", "y'", ecuacion_str)
+    # Reemplaza dy/dx por y_prime
+    ecuacion_str = re.sub(r"d\s*y\s*/\s*d\s*x", "y_prime", ecuacion_str)
+    # Reemplaza y'(x) o y' por y_prime
+    ecuacion_str = re.sub(r"y\s*'(?:\s*\(\s*x\s*\))?", "y_prime", ecuacion_str)
     return ecuacion_str
-
-
-from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 
 def resolver_ecuacion(ecuacion_str, tipo):
     try:
-        ecuacion_str = normalizar_ecuacion(ecuacion_str)
+        ecuacion_str_normalizada = normalizar_ecuacion(ecuacion_str)
         x = symbols('x')
         y_func = Function('y')(x)
+        y_deriv = Derivative(y_func, x)
 
         local_dict = {
             'y': y_func,
-            'x': x
+            'x': x,
+            'y_prime': y_deriv
         }
 
         transformations = standard_transformations + (implicit_multiplication_application, convert_xor)
 
-        if '=' not in ecuacion_str:
+        if '=' not in ecuacion_str_normalizada:
             return None, "Error: La ecuación debe contener un signo '='."
 
-        partes = ecuacion_str.split('=', 1)
+        partes = ecuacion_str_normalizada.split('=', 1)
         lhs_str = partes[0].strip()
         rhs_str = partes[1].strip()
 
+        lhs_expr = parse_expr(lhs_str, local_dict=local_dict, transformations=transformations)
         rhs_expr = parse_expr(rhs_str, local_dict=local_dict, transformations=transformations)
-
-        if lhs_str == "y'":
-            lhs_expr = Derivative(y_func, x)
-        else:
-            lhs_expr = parse_expr(lhs_str, local_dict=local_dict, transformations=transformations)
 
         ecuacion = Eq(lhs_expr, rhs_expr)
 
         hint = ''
-        tipo_resuelto = tipo # Guardamos el tipo seleccionado o autodetectado
+        tipo_resuelto = tipo
 
         if tipo == "Autodetectar":
             hint = clasificar_ecuacion(ecuacion, y_func)
             if not hint:
-                return None, "No se pudo clasificar la ecuación automáticamente. Intente especificar el tipo."
-            tipo_resuelto = hint # Actualizamos el tipo resuelto al hint de sympy
+                return None, "No se pudo clasificar la ecuación."
+            tipo_resuelto = hint
         elif tipo == "Lineal":
-            hint = '1st_Clinear'
+            hint = '1st_linear'
         elif tipo == "Variables Separables":
             hint = 'separable'
         elif tipo == "Homogénea":
