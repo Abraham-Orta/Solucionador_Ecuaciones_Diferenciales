@@ -1,184 +1,225 @@
 import customtkinter as ctk
 from solver import resolver_ecuacion
-from sympy import preview, Symbol, latex
+from sympy import preview, latex
 from PIL import Image
 import os
 import tempfile
+
+# Establece la apariencia de la aplicación (light/dark) y el tema de color
+ctk.set_appearance_mode("light") 
+ctk.set_default_color_theme("blue")
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("Solucionador de Ecuaciones Diferenciales")
-        self.geometry("700x800") # Aumentamos el tamaño para los botones y procedimiento
+        self.geometry("600x950")
 
+        # --- Configuración del Grid Principal ---
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(10, weight=1) # Ajustamos la fila para la solución
+        self.grid_rowconfigure(3, weight=1) # Permite que el frame de la solución se expanda
 
-        self.label_ecuacion = ctk.CTkLabel(self, text="Ecuación diferencial (ej: y' = 2*x / y ):")
-        self.label_ecuacion.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="ew")
+        # --- Frame Superior (Entrada y Botones de Símbolos) ---
+        input_frame = ctk.CTkFrame(self, fg_color="transparent")
+        input_frame.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
+        input_frame.grid_columnconfigure(0, weight=1)
 
-        self.entry_ecuacion = ctk.CTkEntry(self, placeholder_text="y' = (x**2 + 2) / (3*y**2)")
-        self.entry_ecuacion.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        self.label_ecuacion = ctk.CTkLabel(input_frame, text="Ecuación diferencial (ej: y' = x / y)")
+        self.label_ecuacion.grid(row=0, column=0, padx=5, pady=(0, 5), sticky="w")
 
-        # Frame para los botones de símbolos
-        self.simbolos_frame = ctk.CTkFrame(self)
-        self.simbolos_frame.grid(row=2, column=0, padx=10, pady=5)
-        self.simbolos_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=1)
+        self.entry_ecuacion = ctk.CTkEntry(input_frame, height=40, font=("Arial", 14))
+        self.entry_ecuacion.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
 
-        simbolos_fila1 = ['+', '-', '*', '/', '^', '(', ')', "y'", 'x', 'dy/dx']
-        for i, simbolo in enumerate(simbolos_fila1):
-            boton = ctk.CTkButton(self.simbolos_frame, text=simbolo, width=60, command=lambda s=simbolo: self.insertar_simbolo(s))
-            boton.grid(row=0, column=i, padx=5, pady=5)
+        # --- Botonera de Símbolos ---
+        simbolos_frame = ctk.CTkFrame(input_frame)
+        simbolos_frame.grid(row=2, column=0, padx=5, pady=10)
 
-        simbolos_fila2 = ['e', 'sqrt()', 'sin()', 'cos()', 'tan()', 'log()', 'pi', '=']
-        for i, simbolo in enumerate(simbolos_fila2):
-            boton = ctk.CTkButton(self.simbolos_frame, text=simbolo, width=60, command=lambda s=simbolo: self.insertar_simbolo(s))
-            boton.grid(row=1, column=i, padx=5, pady=5)
+        # Fila 1 de símbolos
+        ctk.CTkButton(simbolos_frame, text="+", width=50, command=lambda: self.insertar_simbolo('+')).grid(row=0, column=0, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="-", width=50, command=lambda: self.insertar_simbolo('-')).grid(row=0, column=1, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="%", width=50, command=lambda: self.insertar_simbolo('%')).grid(row=0, column=2, padx=4, pady=4)
+        # Separador visual
+        
+        ctk.CTkButton(simbolos_frame, text="/", width=50, command=lambda: self.insertar_simbolo('/')).grid(row=0, column=4, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="dy/dx", width=50, command=lambda: self.insertar_simbolo("dy/dx")).grid(row=0, column=5, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="dx/dy", width=50, command=lambda: self.insertar_simbolo("dx/dy")).grid(row=0, column=6, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="x", width=50, command=lambda: self.insertar_simbolo('x')).grid(row=0, column=7, padx=4, pady=4)
+        
+        # Fila 2 de símbolos
+        ctk.CTkButton(simbolos_frame, text="e", width=50, command=lambda: self.insertar_simbolo('e')).grid(row=1, column=0, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="√()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sqrt")).grid(row=1, column=1, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="sin()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sin")).grid(row=1, column=2, padx=4, pady=4)
+        # El separador ya ocupa la columna 3
+        ctk.CTkButton(simbolos_frame, text="cos()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("cos")).grid(row=1, column=4, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="tan()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("tan")).grid(row=1, column=5, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="π", width=50, command=lambda: self.insertar_simbolo("pi")).grid(row=1, column=6, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="=", width=50, command=lambda: self.insertar_simbolo('=')).grid(row=1, column=7, padx=4, pady=4)
 
-        self.label_tipo = ctk.CTkLabel(self, text="Tipo de ecuación:")
-        self.label_tipo.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="ew")
+# --- Frame de Controles (Tipo de Ecuación y Acciones) ---
+        controls_frame = ctk.CTkFrame(self, fg_color="transparent")
+        controls_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        # Columna 1 (espacio flexible) tomará todo el espacio extra, empujando los botones a la derecha
+        controls_frame.grid_columnconfigure(1, weight=1) 
 
-        self.tipo_ecuacion = ctk.CTkOptionMenu(self, values=["Autodetectar", "Variables Separables", "Lineal", "Homogénea", "Exacta"])
-        self.tipo_ecuacion.grid(row=4, column=0, padx=10, pady=5)
+        # --- Tipo de Ecuación ---
+        ctk.CTkLabel(controls_frame, text="Tipo de ecuación:").grid(row=0, column=0, padx=(5,0), pady=5, sticky="w")
+        self.tipo_ecuacion = ctk.CTkOptionMenu(controls_frame, values=["Autodetectar", "Variables Separables", "Lineal", "Homogénea", "Exacta"])
+        self.tipo_ecuacion.grid(row=0, column=1, padx=(0, 5), pady=5, sticky="w")
 
-        self.boton_resolver = ctk.CTkButton(self, text="Resolver", command=self.resolver)
-        self.boton_resolver.grid(row=5, column=0, padx=10, pady=10)
+        # --- Botones de Acción ---
+        self.boton_resolver = ctk.CTkButton(controls_frame, text="Resolver", height=35, command=self.resolver)
+        self.boton_resolver.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
 
-        # Nuevo: Área para el procedimiento
-        self.label_procedimiento = ctk.CTkLabel(self, text="Procedimiento:")
-        self.label_procedimiento.grid(row=6, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.boton_limpiar = ctk.CTkButton(controls_frame, text="Limpiar", height=35, command=self.limpiar_todo,
+                                           fg_color="transparent", 
+                                           text_color=("gray10", "gray90"), 
+                                           border_width=1,
+                                           border_color="gray70")
+        self.boton_limpiar.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-        self.texto_procedimiento = ctk.CTkTextbox(self, height=150) # Altura para el procedimiento
-        self.texto_procedimiento.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
+        # Configurar las columnas para que los botones se expandan
+        controls_frame.grid_columnconfigure(0, weight=1)
+        controls_frame.grid_columnconfigure(1, weight=1)
 
-        self.label_solucion = ctk.CTkLabel(self, text="Solución:")
-        self.label_solucion.grid(row=8, column=0, padx=10, pady=(10, 0), sticky="ew")
+        # --- Frame de Procedimiento ---
+        procedimiento_frame = ctk.CTkFrame(self)
+        procedimiento_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        procedimiento_frame.grid_columnconfigure(0, weight=1)
 
-        # Frame para contener la solución (texto o imagen)
-        self.solucion_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.solucion_frame.grid(row=9, column=0, padx=10, pady=5, sticky="nsew")
-        self.solucion_frame.grid_rowconfigure(0, weight=1)
-        self.solucion_frame.grid_columnconfigure(0, weight=1)
+        self.label_procedimiento = ctk.CTkLabel(procedimiento_frame, text="Procedimiento:", font=ctk.CTkFont(weight="bold"))
+        self.label_procedimiento.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
 
-        # Widget de texto (para errores o fallback)
-        self.texto_solucion = ctk.CTkTextbox(self.solucion_frame, height=100)
-        # Se mostrará u ocultará según sea necesario
+        self.texto_procedimiento = ctk.CTkTextbox(procedimiento_frame, height=150, wrap="word")
+        self.texto_procedimiento.grid(row=1, column=0, padx=10, pady=(5, 10), sticky="nsew")
 
-        # Nuevo: ScrollableFrame para la imagen de la solución
-        self.scrollable_solucion_frame = ctk.CTkScrollableFrame(self.solucion_frame, fg_color="transparent")
-        self.scrollable_solucion_frame.grid(row=0, column=0, sticky="nsew")
-        self.scrollable_solucion_frame.grid_columnconfigure(0, weight=1)
+        # --- Frame de Solución ---
+        solucion_frame = ctk.CTkFrame(self)
+        solucion_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
+        solucion_frame.grid_columnconfigure(0, weight=1)
+        solucion_frame.grid_rowconfigure(1, weight=1)
 
-        # Widget de imagen (para la solución LaTeX) dentro del scrollable frame
-        self.imagen_solucion_label = ctk.CTkLabel(self.scrollable_solucion_frame, text="")
-        self.solucion_img = None # Para mantener una referencia a la imagen
+        self.label_solucion = ctk.CTkLabel(solucion_frame, text="Solución:", font=ctk.CTkFont(weight="bold"))
+        self.label_solucion.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
 
-        # Nuevo: Label para mensajes de estado/error
-        self.status_label = ctk.CTkLabel(self, text="", text_color="red")
-        self.status_label.grid(row=10, column=0, padx=10, pady=5, sticky="ew")
+        # Scrollable frame para contener la imagen/texto de la solución
+        self.solucion_container = ctk.CTkScrollableFrame(solucion_frame, fg_color="transparent")
+        self.solucion_container.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+        self.solucion_container.grid_columnconfigure(0, weight=1)
+        self.solucion_widgets = [] # Lista para mantener referencia a los widgets de la solución
+
+        # --- Label de Estado ---
+        self.status_label = ctk.CTkLabel(self, text="", font=ctk.CTkFont(slant="italic"))
+        self.status_label.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
+
 
     def insertar_simbolo(self, simbolo):
         self.entry_ecuacion.insert(ctk.INSERT, simbolo)
 
-    def _limpiar_resultados(self):
+    def insertar_simbolo_con_parentesis(self, funcion):
+        """Inserta una función y coloca el cursor dentro de los paréntesis."""
+        self.entry_ecuacion.insert(ctk.INSERT, f"{funcion}()")
+        self.entry_ecuacion.icursor(self.entry_ecuacion.index(ctk.INSERT) - 1)
+
+    def limpiar_todo(self):
+        """Limpia la entrada, el procedimiento, la solución y el estado."""
+        self.entry_ecuacion.delete(0, "end")
         self.texto_procedimiento.delete("1.0", "end")
-        self.texto_solucion.delete("1.0", "end")
-        self.imagen_solucion_label.grid_forget()
-        self.texto_solucion.grid_forget()
+        for widget in self.solucion_widgets:
+            widget.destroy()
+        self.solucion_widgets = []
         self.status_label.configure(text="")
-        # Asegurarse de ocultar el scrollable frame también
-        self.scrollable_solucion_frame.grid_forget()
+
+    def _limpiar_resultados_anteriores(self):
+        """Limpia solo las áreas de resultado antes de resolver."""
+        self.texto_procedimiento.delete("1.0", "end")
+        for widget in self.solucion_widgets:
+            widget.destroy()
+        self.solucion_widgets = []
+        self.status_label.configure(text="")
 
     def _mostrar_mensaje_estado(self, mensaje, es_error=False):
-        color = "red" if es_error else "green"
+        color = "#D32F2F" if es_error else "#388E3C" # Rojo para error, Verde para éxito
         self.status_label.configure(text=mensaje, text_color=color)
 
     def mostrar_texto_solucion(self, texto):
-        self.scrollable_solucion_frame.grid_forget() # Ocultar scrollable frame
-        self.texto_solucion.grid(row=0, column=0, sticky="nsew") # Mostrar texto
-        self.texto_solucion.delete("1.0", "end")
-        self.texto_solucion.insert("1.0", texto)
+        label = ctk.CTkLabel(self.solucion_container, text=texto, wraplength=500)
+        label.pack(pady=5, padx=5)
+        self.solucion_widgets.append(label)
 
     def mostrar_imagen_solucion(self, ruta_imagen):
-        self.texto_solucion.grid_forget() # Ocultar texto
-        self.scrollable_solucion_frame.grid(row=0, column=0, sticky="nsew") # Mostrar scrollable frame
         try:
-            img = Image.open(ruta_imagen)
-            img_width, img_height = img.size
+            img_original = Image.open(ruta_imagen)
+            
+            # Escalar la imagen para que se ajuste al ancho del contenedor
+            container_width = self.solucion_container.winfo_width() - 30 # Ancho del frame - padding
+            if container_width < 50: container_width = 500 # Valor por defecto si el frame no se ha dibujado
 
-            # Definir un tamaño máximo para la visualización inicial sin scroll
-            # Si la imagen es más grande que esto, se mostrará en su tamaño original dentro del scrollable frame
-            max_display_width = self.solucion_frame.winfo_width() # Ancho del frame contenedor
-            max_display_height = 400 # Altura máxima deseada para la imagen sin scroll
+            ratio = container_width / img_original.width
+            new_height = int(img_original.height * ratio)
+            
+            img_redimensionada = img_original.resize((container_width, new_height), Image.LANCZOS)
 
-            # Escalar solo si la imagen es significativamente más grande que el área visible
-            if img_width > max_display_width or img_height > max_display_height:
-                ratio = min(max_display_width / img_width, max_display_height / img_height)
-                new_width = int(img_width * ratio)
-                new_height = int(img_height * ratio)
-                # Solo escalamos si la imagen es realmente grande, de lo contrario, la mostramos en su tamaño original
-                if new_width < img_width or new_height < img_height:
-                    img = img.resize((new_width, new_height), Image.LANCZOS)
+            solucion_img = ctk.CTkImage(light_image=img_redimensionada, size=(container_width, new_height))
+            label = ctk.CTkLabel(self.solucion_container, image=solucion_img, text="")
+            label.pack(pady=5, padx=5, expand=True)
+            self.solucion_widgets.append(label)
 
-            self.solucion_img = ctk.CTkImage(light_image=img, size=img.size)
-            self.imagen_solucion_label.configure(image=self.solucion_img)
-            self.imagen_solucion_label.grid(row=0, column=0, sticky="nsew") # Mostrar imagen dentro del scrollable frame
         except Exception as e:
-            self._mostrar_mensaje_estado(f"Error al mostrar la imagen: {e}", es_error=True)
+            self._mostrar_mensaje_estado(f"Error al mostrar imagen: {e}", es_error=True)
             self.mostrar_texto_solucion(f"No se pudo mostrar la imagen de la solución.\nError: {e}")
         finally:
-            # Asegurarse de eliminar el archivo temporal después de usarlo
             if os.path.exists(ruta_imagen):
                 os.remove(ruta_imagen)
 
     def resolver(self):
-        self._limpiar_resultados()
-        self._mostrar_mensaje_estado("Resolviendo...", es_error=False)
-        self.boton_resolver.configure(state="disabled")
-
+        self._limpiar_resultados_anteriores()
         ecuacion = self.entry_ecuacion.get()
-        tipo = self.tipo_ecuacion.get()
 
         if not ecuacion:
             self._mostrar_mensaje_estado("Por favor, introduce una ecuación.", es_error=True)
-            self.boton_resolver.configure(state="normal")
             return
 
-        solucion_obj, procedimiento_texto = resolver_ecuacion(ecuacion, tipo)
+        self._mostrar_mensaje_estado("Resolviendo...", es_error=False)
+        self.boton_resolver.configure(state="disabled")
+        self.update_idletasks() # Forzar actualización de la GUI
 
-        # Mostrar el procedimiento
-        self.texto_procedimiento.insert("1.0", procedimiento_texto)
-
-        # Si la solución es None, es un error o un mensaje.
-        if solucion_obj is None:
-            self._mostrar_mensaje_estado(f"Error al resolver: {procedimiento_texto}", es_error=True)
-            self.mostrar_texto_solucion("No se pudo encontrar una solución o hubo un error. Revisa el mensaje de error.")
-            self.boton_resolver.configure(state="normal")
-            return
-
-        # Si es una solución de SymPy, intentamos renderizarla con LaTeX
         try:
-            # Generar la representación LaTeX de la solución
-            # Usamos mode='inline' y lo envolvemos en '$' para que preview funcione correctamente
-            latex_solucion = f"${latex(solucion_obj, mode='inline')}$"
+            tipo = self.tipo_ecuacion.get()
+            solucion_obj, procedimiento_texto = resolver_ecuacion(ecuacion, tipo)
+            
+            self.texto_procedimiento.insert("1.0", procedimiento_texto)
 
-            # Crear un archivo temporal para guardar la imagen de la solución
-            # delete=False porque la función mostrar_imagen_solucion lo eliminará
+            if solucion_obj is None:
+                # If solver returns None, assume procedimiento_texto contains the error
+                raise ValueError(procedimiento_texto if procedimiento_texto else "No se pudo resolver la ecuación.")
+
+            # --- CORRECTED LATEX GENERATION ---
+            # Use the align* environment for robust formatting of one or more lines.
+            if isinstance(solucion_obj, list):
+                latex_contenido = r"\\ ".join([latex(sol) for sol in solucion_obj])
+            else:
+                latex_contenido = latex(solucion_obj)
+            
+            # This format is more standard for sympy's preview function.
+            latex_solucion = r"\begin{align*}" + latex_contenido + r"\end{align*}"
+            
             with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
                 temp_filename = tmpfile.name
             
-            # Generar la imagen PNG a partir del código LaTeX
-            preview(latex_solucion, viewer='file', filename=temp_filename, euler=False, dvioptions=['-D', '200'])
+            # Call preview without the explicit preamble. It will load amsmath automatically for align*.
+            preview(latex_solucion, viewer='file', filename=temp_filename, euler=False, dvioptions=["-D", "300"])
 
-            # Mostrar la imagen en la GUI
             self.mostrar_imagen_solucion(temp_filename)
             self._mostrar_mensaje_estado("Solución renderizada con éxito.", es_error=False)
 
         except Exception as e:
-            # Si la generación de LaTeX/imagen falla, mostramos la versión en texto plano como fallback.
-            self._mostrar_mensaje_estado(f"No se pudo renderizar la solución con LaTeX: {e}", es_error=True)
-            fallback_texto = f"Solución (texto plano):\n{str(solucion_obj)}"
-            self.mostrar_texto_solucion(fallback_texto)
+            error_msg = f"Error: {e}"
+            self._mostrar_mensaje_estado(error_msg, es_error=True)
+            self.mostrar_texto_solucion("No se pudo encontrar o renderizar la solución. Revisa la ecuación y el procedimiento.")
+            # Ensure the error message from the solver is visible in the procedure box
+            if not self.texto_procedimiento.get("1.0", "end").strip():
+                self.texto_procedimiento.insert("1.0", error_msg)
+
         finally:
             self.boton_resolver.configure(state="normal")
