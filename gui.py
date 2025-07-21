@@ -6,7 +6,7 @@ import os
 import tempfile
 
 # Establece la apariencia de la aplicación (light/dark) y el tema de color
-ctk.set_appearance_mode("light") 
+# ctk.set_appearance_mode("light") 
 ctk.set_default_color_theme("blue")
 
 class App(ctk.CTk):
@@ -17,23 +17,32 @@ class App(ctk.CTk):
         self.geometry("600x950")
 
         # --- Configuración del Grid Principal ---
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(3, weight=1) # Permite que el frame de la solución se expanda
+        self.grid_columnconfigure(0, weight=1) # Main content column
+        self.grid_rowconfigure(5, weight=1) # Permite que el frame de la solución se expanda
 
         # --- Frame Superior (Entrada y Botones de Símbolos) ---
         input_frame = ctk.CTkFrame(self, fg_color="transparent")
-        input_frame.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
+        input_frame.grid(row=2, column=0, padx=10, pady=(10, 5), sticky="ew")
         input_frame.grid_columnconfigure(0, weight=1)
+        input_frame.grid_columnconfigure(1, weight=0) # Columna para el selector de tema
 
-        self.label_ecuacion = ctk.CTkLabel(input_frame, text="Ecuación diferencial (ej: y' = x / y)")
-        self.label_ecuacion.grid(row=0, column=0, padx=5, pady=(0, 5), sticky="w")
+        # --- Selector de Tema ---
+        self.appearance_mode_label = ctk.CTkLabel(input_frame, text="Apariencia:")
+        self.appearance_mode_label.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="ne")
+        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(input_frame, values=["Light", "Dark", "System"],
+                                                               command=self.change_appearance_mode_event)
+        self.appearance_mode_optionemenu.grid(row=1, column=1, padx=10, pady=(0, 10), sticky="ne")
+        self.appearance_mode_optionemenu.set(ctk.get_appearance_mode().capitalize()) # Establecer el valor inicial
+
+        self.label_ecuacion = ctk.CTkLabel(input_frame, text="Ecuación diferencial:")
+        self.label_ecuacion.grid(row=1, column=0, padx=5, pady=(0, 5), sticky="w")
 
         self.entry_ecuacion = ctk.CTkEntry(input_frame, height=40, font=("Arial", 14))
-        self.entry_ecuacion.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        self.entry_ecuacion.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
 
         # --- Botonera de Símbolos ---
         simbolos_frame = ctk.CTkFrame(input_frame)
-        simbolos_frame.grid(row=2, column=0, padx=5, pady=10)
+        simbolos_frame.grid(row=3, column=0, padx=5, pady=10)
 
         # Fila 1 de símbolos
         ctk.CTkButton(simbolos_frame, text="+", width=50, command=lambda: self.insertar_simbolo('+')).grid(row=0, column=0, padx=4, pady=4)
@@ -56,9 +65,9 @@ class App(ctk.CTk):
         ctk.CTkButton(simbolos_frame, text="π", width=50, command=lambda: self.insertar_simbolo("pi")).grid(row=1, column=6, padx=4, pady=4)
         ctk.CTkButton(simbolos_frame, text="=", width=50, command=lambda: self.insertar_simbolo('=')).grid(row=1, column=7, padx=4, pady=4)
 
-# --- Frame de Controles (Tipo de Ecuación y Acciones) ---
+        # --- Frame de Controles (Tipo de Ecuación y Acciones) ---
         controls_frame = ctk.CTkFrame(self, fg_color="transparent")
-        controls_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        controls_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
         # Columna 1 (espacio flexible) tomará todo el espacio extra, empujando los botones a la derecha
         controls_frame.grid_columnconfigure(1, weight=1) 
 
@@ -68,15 +77,15 @@ class App(ctk.CTk):
         self.tipo_ecuacion.grid(row=0, column=1, padx=(0, 5), pady=5, sticky="w")
 
         # --- Botones de Acción ---
-        self.boton_resolver = ctk.CTkButton(controls_frame, text="Resolver", height=35, command=self.resolver)
-        self.boton_resolver.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        self.boton_resolver = ctk.CTkButton(controls_frame, text="Resolver", command=self.resolver, width=100, height=30)
+        self.boton_resolver.grid(row=1, column=0, padx=5, pady=5)
 
-        self.boton_limpiar = ctk.CTkButton(controls_frame, text="Limpiar", height=35, command=self.limpiar_todo,
+        self.boton_limpiar = ctk.CTkButton(controls_frame, text="Limpiar", command=self.limpiar_todo, width=100, height=30,
                                            fg_color="transparent", 
                                            text_color=("gray10", "gray90"), 
                                            border_width=1,
                                            border_color="gray70")
-        self.boton_limpiar.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        self.boton_limpiar.grid(row=1, column=1, padx=5, pady=5)
 
         # Configurar las columnas para que los botones se expandan
         controls_frame.grid_columnconfigure(0, weight=1)
@@ -84,7 +93,7 @@ class App(ctk.CTk):
 
         # --- Frame de Procedimiento ---
         procedimiento_frame = ctk.CTkFrame(self)
-        procedimiento_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        procedimiento_frame.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
         procedimiento_frame.grid_columnconfigure(0, weight=1)
 
         self.label_procedimiento = ctk.CTkLabel(procedimiento_frame, text="Procedimiento:", font=ctk.CTkFont(weight="bold"))
@@ -95,7 +104,7 @@ class App(ctk.CTk):
 
         # --- Frame de Solución ---
         solucion_frame = ctk.CTkFrame(self)
-        solucion_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
+        solucion_frame.grid(row=5, column=0, padx=10, pady=10, sticky="nsew")
         solucion_frame.grid_columnconfigure(0, weight=1)
         solucion_frame.grid_rowconfigure(1, weight=1)
 
@@ -110,8 +119,11 @@ class App(ctk.CTk):
 
         # --- Label de Estado ---
         self.status_label = ctk.CTkLabel(self, text="", font=ctk.CTkFont(slant="italic"))
-        self.status_label.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
+        self.status_label.grid(row=6, column=0, padx=10, pady=(0, 10), sticky="w")
 
+
+    def change_appearance_mode_event(self, new_appearance_mode: str):
+        ctk.set_appearance_mode(new_appearance_mode)
 
     def insertar_simbolo(self, simbolo):
         self.entry_ecuacion.insert(ctk.INSERT, simbolo)
@@ -152,7 +164,7 @@ class App(ctk.CTk):
             img_original = Image.open(ruta_imagen)
             
             # Escalar la imagen para que se ajuste al ancho del contenedor
-            container_width = self.solucion_container.winfo_width() - 30 # Ancho del frame - padding
+            container_width = int((self.solucion_container.winfo_width() - 30) * 0.7) # Ancho del frame - padding, reducido al 70%
             if container_width < 50: container_width = 500 # Valor por defecto si el frame no se ha dibujado
 
             ratio = container_width / img_original.width
