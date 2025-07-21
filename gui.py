@@ -68,28 +68,29 @@ class App(ctk.CTk):
         # --- Frame de Controles (Tipo de Ecuación y Acciones) ---
         controls_frame = ctk.CTkFrame(self, fg_color="transparent")
         controls_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
-        # Columna 1 (espacio flexible) tomará todo el espacio extra, empujando los botones a la derecha
-        controls_frame.grid_columnconfigure(1, weight=1) 
+        controls_frame.grid_columnconfigure(1, weight=1)  # Columna para los botones de acción
 
-        # --- Tipo de Ecuación ---
-        ctk.CTkLabel(controls_frame, text="Tipo de ecuación:").grid(row=0, column=0, padx=(5,0), pady=5, sticky="w")
-        self.tipo_ecuacion = ctk.CTkOptionMenu(controls_frame, values=["Autodetectar", "Variables Separables", "Lineal", "Homogénea", "Exacta"])
-        self.tipo_ecuacion.grid(row=0, column=1, padx=(0, 5), pady=5, sticky="w")
+        # --- Frame para el tipo de ecuación ---
+        tipo_ecuacion_frame = ctk.CTkFrame(controls_frame, fg_color="transparent")
+        tipo_ecuacion_frame.grid(row=0, column=0, sticky="w")
 
-        # --- Botones de Acción ---
-        self.boton_resolver = ctk.CTkButton(controls_frame, text="Resolver", command=self.resolver, width=100, height=30)
-        self.boton_resolver.grid(row=1, column=0, padx=5, pady=5)
+        ctk.CTkLabel(tipo_ecuacion_frame, text="Tipo de ecuación:").pack(side="left", padx=(5, 5), pady=5)
+        self.tipo_ecuacion = ctk.CTkOptionMenu(tipo_ecuacion_frame, values=["Autodetectar", "Variables Separables", "Lineal", "Homogénea", "Exacta"])
+        self.tipo_ecuacion.pack(side="left", padx=(0, 5), pady=5)
 
-        self.boton_limpiar = ctk.CTkButton(controls_frame, text="Limpiar", command=self.limpiar_todo, width=100, height=30,
-                                           fg_color="transparent", 
-                                           text_color=("gray10", "gray90"), 
+        # --- Frame para los botones de acción ---
+        action_buttons_frame = ctk.CTkFrame(controls_frame, fg_color="transparent")
+        action_buttons_frame.grid(row=0, column=1, sticky="e")
+
+        self.boton_resolver = ctk.CTkButton(action_buttons_frame, text="Resolver", command=self.resolver, width=100, height=30)
+        self.boton_resolver.pack(side="left", padx=5, pady=5)
+
+        self.boton_limpiar = ctk.CTkButton(action_buttons_frame, text="Limpiar", command=self.limpiar_todo, width=100, height=30,
+                                           fg_color="transparent",
+                                           text_color=("gray10", "gray90"),
                                            border_width=1,
                                            border_color="gray70")
-        self.boton_limpiar.grid(row=1, column=1, padx=5, pady=5)
-
-        # Configurar las columnas para que los botones se expandan
-        controls_frame.grid_columnconfigure(0, weight=1)
-        controls_frame.grid_columnconfigure(1, weight=1)
+        self.boton_limpiar.pack(side="left", padx=5, pady=5)
 
         # --- Frame de Procedimiento ---
         procedimiento_frame = ctk.CTkFrame(self)
