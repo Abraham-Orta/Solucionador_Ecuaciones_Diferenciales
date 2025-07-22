@@ -14,7 +14,7 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("Solucionador de Ecuaciones Diferenciales")
-        self.geometry("600x950")
+        self.geometry("720x950")
 
         # --- Configuración del Grid Principal ---
         self.grid_columnconfigure(0, weight=1) # Main content column
@@ -40,30 +40,42 @@ class App(ctk.CTk):
         self.entry_ecuacion = ctk.CTkEntry(input_frame, height=40, font=("Arial", 14))
         self.entry_ecuacion.grid(row=2, column=0, padx=5, pady=5, sticky="ew")
 
-        # --- Botonera de Símbolos ---
+        # --- Botonera de Símbolos (Reorganizada) ---
         simbolos_frame = ctk.CTkFrame(input_frame)
-        simbolos_frame.grid(row=3, column=0, padx=5, pady=10)
+        simbolos_frame.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
 
-        # Fila 1 de símbolos
+        # Fila 1: Operadores y Paréntesis
         ctk.CTkButton(simbolos_frame, text="+", width=50, command=lambda: self.insertar_simbolo('+')).grid(row=0, column=0, padx=4, pady=4)
         ctk.CTkButton(simbolos_frame, text="-", width=50, command=lambda: self.insertar_simbolo('-')).grid(row=0, column=1, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="%", width=50, command=lambda: self.insertar_simbolo('%')).grid(row=0, column=2, padx=4, pady=4)
-        # Separador visual
-        
-        ctk.CTkButton(simbolos_frame, text="/", width=50, command=lambda: self.insertar_simbolo('/')).grid(row=0, column=4, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="dy/dx", width=50, command=lambda: self.insertar_simbolo("dy/dx")).grid(row=0, column=5, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="dx/dy", width=50, command=lambda: self.insertar_simbolo("dx/dy")).grid(row=0, column=6, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="x", width=50, command=lambda: self.insertar_simbolo('x')).grid(row=0, column=7, padx=4, pady=4)
-        
-        # Fila 2 de símbolos
-        ctk.CTkButton(simbolos_frame, text="e", width=50, command=lambda: self.insertar_simbolo('e')).grid(row=1, column=0, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="√()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sqrt")).grid(row=1, column=1, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="sin()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sin")).grid(row=1, column=2, padx=4, pady=4)
-        # El separador ya ocupa la columna 3
-        ctk.CTkButton(simbolos_frame, text="cos()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("cos")).grid(row=1, column=4, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="tan()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("tan")).grid(row=1, column=5, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="π", width=50, command=lambda: self.insertar_simbolo("pi")).grid(row=1, column=6, padx=4, pady=4)
-        ctk.CTkButton(simbolos_frame, text="=", width=50, command=lambda: self.insertar_simbolo('=')).grid(row=1, column=7, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="*", width=50, command=lambda: self.insertar_simbolo('*')).grid(row=0, column=2, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="/", width=50, command=lambda: self.insertar_simbolo('/')).grid(row=0, column=3, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="^", width=50, command=lambda: self.insertar_simbolo('^')).grid(row=0, column=4, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="(", width=50, command=lambda: self.insertar_simbolo('(')).grid(row=0, column=5, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text=")", width=50, command=lambda: self.insertar_simbolo(')')).grid(row=0, column=6, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="=", width=50, command=lambda: self.insertar_simbolo('=')).grid(row=0, column=7, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="x", width=50, command=lambda: self.insertar_simbolo('x')).grid(row=0, column=8, padx=4, pady=4)
+
+        # Fila 2: Variables, Constantes, Derivadas y Funciones Comunes
+        ctk.CTkButton(simbolos_frame, text="y", width=50, command=lambda: self.insertar_simbolo('y')).grid(row=1, column=0, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="e", width=50, command=lambda: self.insertar_simbolo('e')).grid(row=1, column=1, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="π", width=50, command=lambda: self.insertar_simbolo("pi")).grid(row=1, column=2, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="y'", width=50, command=lambda: self.insertar_simbolo("y'")).grid(row=1, column=3, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="dy/dx", width=50, command=lambda: self.insertar_simbolo("dy/dx")).grid(row=1, column=4, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="dx/dy", width=50, command=lambda: self.insertar_simbolo("dx/dy")).grid(row=1, column=5, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="√()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sqrt")).grid(row=1, column=6, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="ln()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("log")).grid(row=1, column=7, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="abs()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("Abs")).grid(row=1, column=8, padx=4, pady=4)
+
+        # Fila 3: Funciones Trigonométricas
+        ctk.CTkButton(simbolos_frame, text="sin()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sin")).grid(row=2, column=0, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="cos()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("cos")).grid(row=2, column=1, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="tan()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("tan")).grid(row=2, column=2, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="csc()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("csc")).grid(row=2, column=3, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="sec()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("sec")).grid(row=2, column=4, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="cot()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("cot")).grid(row=2, column=5, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="asin()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("asin")).grid(row=2, column=6, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="acos()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("acos")).grid(row=2, column=7, padx=4, pady=4)
+        ctk.CTkButton(simbolos_frame, text="atan()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("atan")).grid(row=2, column=8, padx=4, pady=4)
 
         # --- Frame de Controles (Tipo de Ecuación y Acciones) ---
         controls_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -184,6 +196,81 @@ class App(ctk.CTk):
         finally:
             if os.path.exists(ruta_imagen):
                 os.remove(ruta_imagen)
+
+    def mostrar_imagen_procedimiento(self, procedimiento_texto):
+        """
+        Renderiza el procedimiento como imagen LaTeX y lo muestra en la interfaz.
+        """
+        from sympy import preview
+        from PIL import Image, ImageTk
+        import os
+        import tempfile
+        try:
+            # Crear imagen temporal
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_img:
+                ruta_img = temp_img.name
+            # Convertir el texto a LaTeX (escapando saltos de línea)
+            latex_code = r"\begin{align*}" + procedimiento_texto.replace("\n", r"\\") + r"\end{align*}"
+            preview(latex_code, viewer='file', filename=ruta_img, euler=False, dvioptions=["-D", "150"])
+            # Mostrar imagen en el frame de procedimiento
+            img = Image.open(ruta_img)
+            img = img.resize((500, int(img.height * 500 / img.width)), Image.LANCZOS)
+            img_tk = ImageTk.PhotoImage(img)
+            label_img = ctk.CTkLabel(self.texto_procedimiento, image=img_tk, text="")
+            label_img.image = img_tk  # Mantener referencia
+            label_img.pack(pady=5)
+            self.solucion_widgets.append(label_img)
+            os.remove(ruta_img)
+        except Exception as e:
+            self._mostrar_mensaje_estado(f"Error al renderizar imagen del procedimiento: {e}", es_error=True)
+
+    def resolver(self):
+        self._limpiar_resultados_anteriores()
+        ecuacion = self.entry_ecuacion.get()
+
+        if not ecuacion:
+            self._mostrar_mensaje_estado("Por favor ingresa una ecuación.", es_error=True)
+            return
+
+        self._mostrar_mensaje_estado("Resolviendo...", es_error=False)
+        self.boton_resolver.configure(state="disabled")
+        self.update_idletasks()
+
+        tipo = self.tipo_ecuacion.get()
+        solucion, procedimiento = resolver_ecuacion(ecuacion, tipo)
+
+        # Mostrar procedimiento como texto y como imagen
+        self.texto_procedimiento.delete("1.0", "end")
+        self.texto_procedimiento.insert("1.0", procedimiento)
+        self.mostrar_imagen_procedimiento(procedimiento)
+
+        # Mostrar solución como texto
+        if solucion is not None:
+            self.mostrar_texto_solucion(str(solucion))
+            self._mostrar_mensaje_estado("Solución encontrada.", es_error=False)
+        else:
+            self._mostrar_mensaje_estado("No se pudo encontrar una solución.", es_error=True)
+
+        self.boton_resolver.configure(state="normal")
+
+        # --- CORRECTED LATEX GENERATION ---
+        # Use the align* environment for robust formatting of one or more lines.
+        if isinstance(solucion_obj, list):
+            latex_contenido = r"\\ ".join([latex(sol) for sol in solucion_obj])
+        else:
+            latex_contenido = latex(solucion_obj)
+        
+        # This format is more standard for sympy's preview function.
+        latex_solucion = r"\begin{align*}" + latex_contenido + r"\end{align*}"
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+            temp_filename = tmpfile.name
+        
+        # Call preview without the explicit preamble. It will load amsmath automatically for align*.
+        preview(latex_solucion, viewer='file', filename=temp_filename, euler=False, dvioptions=["-D", "300"])
+
+        self.mostrar_imagen_solucion(temp_filename)
+        self._mostrar_mensaje_estado("Solución renderizada con éxito.", es_error=False)
 
     def resolver(self):
         self._limpiar_resultados_anteriores()
