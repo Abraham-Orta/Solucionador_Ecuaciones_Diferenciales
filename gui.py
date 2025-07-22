@@ -17,12 +17,20 @@ class App(ctk.CTk):
         self.geometry("720x950")
 
         # --- Configuración del Grid Principal ---
-        self.grid_columnconfigure(0, weight=1) # Main content column
-        self.grid_rowconfigure(5, weight=1) # Permite que el frame de la solución se expanda
+        self.grid_columnconfigure(0, weight=1) # Permite que el frame principal se expanda horizontalmente
+        self.grid_rowconfigure(0, weight=1) # Permite que el frame principal se expanda verticalmente
+
+        # --- Frame Principal con Scroll --- 
+        self.main_scroll_frame = ctk.CTkScrollableFrame(self)
+        self.main_scroll_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Configuración del grid dentro del main_scroll_frame
+        self.main_scroll_frame.grid_columnconfigure(0, weight=1) # Columna principal para el contenido
+        self.main_scroll_frame.grid_rowconfigure(3, weight=1) # Permite que el frame de la solución se expanda dentro del scrollable frame
 
         # --- Frame Superior (Entrada y Botones de Símbolos) ---
-        input_frame = ctk.CTkFrame(self, fg_color="transparent")
-        input_frame.grid(row=2, column=0, padx=10, pady=(10, 5), sticky="ew")
+        input_frame = ctk.CTkFrame(self.main_scroll_frame, fg_color="transparent")
+        input_frame.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
         input_frame.grid_columnconfigure(0, weight=1)
         input_frame.grid_columnconfigure(1, weight=0) # Columna para el selector de tema
 
@@ -78,8 +86,8 @@ class App(ctk.CTk):
         ctk.CTkButton(simbolos_frame, text="atan()", width=50, command=lambda: self.insertar_simbolo_con_parentesis("atan")).grid(row=2, column=8, padx=4, pady=4)
 
         # --- Frame de Controles (Tipo de Ecuación y Acciones) ---
-        controls_frame = ctk.CTkFrame(self, fg_color="transparent")
-        controls_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
+        controls_frame = ctk.CTkFrame(self.main_scroll_frame, fg_color="transparent")
+        controls_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
         controls_frame.grid_columnconfigure(1, weight=1)  # Columna para los botones de acción
 
         # --- Frame para el tipo de ecuación ---
@@ -105,8 +113,8 @@ class App(ctk.CTk):
         self.boton_limpiar.pack(side="left", padx=5, pady=5)
 
         # --- Frame de Procedimiento ---
-        procedimiento_frame = ctk.CTkFrame(self)
-        procedimiento_frame.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+        procedimiento_frame = ctk.CTkFrame(self.main_scroll_frame)
+        procedimiento_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
         procedimiento_frame.grid_columnconfigure(0, weight=1)
 
         self.label_procedimiento = ctk.CTkLabel(procedimiento_frame, text="Procedimiento:", font=ctk.CTkFont(weight="bold"))
@@ -116,8 +124,8 @@ class App(ctk.CTk):
         self.texto_procedimiento.grid(row=1, column=0, padx=10, pady=(5, 10), sticky="nsew")
 
         # --- Frame de Solución ---
-        solucion_frame = ctk.CTkFrame(self)
-        solucion_frame.grid(row=5, column=0, padx=10, pady=10, sticky="nsew")
+        solucion_frame = ctk.CTkFrame(self.main_scroll_frame)
+        solucion_frame.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
         solucion_frame.grid_columnconfigure(0, weight=1)
         solucion_frame.grid_rowconfigure(1, weight=1)
 
@@ -131,8 +139,8 @@ class App(ctk.CTk):
         self.solucion_widgets = [] # Lista para mantener referencia a los widgets de la solución
 
         # --- Label de Estado ---
-        self.status_label = ctk.CTkLabel(self, text="", font=ctk.CTkFont(slant="italic"))
-        self.status_label.grid(row=6, column=0, padx=10, pady=(0, 10), sticky="w")
+        self.status_label = ctk.CTkLabel(self.main_scroll_frame, text="", font=ctk.CTkFont(slant="italic"))
+        self.status_label.grid(row=4, column=0, padx=10, pady=(0, 10), sticky="w")
 
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
